@@ -16,6 +16,13 @@ luagimp = {
             m = 3779.5275591,
             ft = 1152,
             yd = 3456
+        },
+        available_fill_with = {
+            "background-color",
+            "foreground-color",
+            "white",
+            "transparency",
+            "pattern"
         }
     },
     _DEBUG = false
@@ -62,27 +69,60 @@ function luagimp.help(obj, key)
     return res
 end
 
+function luagimp.is_valid(value, options)
+    for i, option in ipairs(options) do
+        if value == option then
+            return true, i
+        end
+    end
+end
+
+function luagimp.switch(default, value)
+    if value == nil then
+        return default
+    else
+        return value
+    end
+end
+
+function luagimp.index(tab, elem, key)
+    key = key or function(a) return a end
+    for i, v in ipairs(tab) do
+        if key(v) == elem then
+            return i
+        end
+    end
+end
+
+function luagimp.needs_active_file()
+    if not luagimp.variables.active_file then
+        error("luagimp error: Needs active file.", 3)
+    end
+end
+
+function luagimp.needs_active_layer()
+    if not luagimp.variables.active_file.active_layer then
+        error("luagimp error: Needs active layer.", 3)
+    end
+end
+
 function luagimp.init(path, pathtype)
     if pathtype == "require" then
-        luagimp.variables.path = path
-        luagimp.variables.by = "require"
+        luagimp.variables.path.path = path
+        luagimp.variables.path.by = "require"
 
         -- import
 
         require (path .. ".modules.file")
+        require (path .. ".modules.layer")
     elseif pathtype == "dofile" then
-        luagimp.variables.path = path
-        luagimp.variables.by = "dofile"
+        luagimp.variables.path.path = path
+        luagimp.variables.path.by = "dofile"
 
         -- import
 
         dofile (path .. "/modules/file.lua")
+        dofile (path .. "/modules/layer.lua")
     end
     love.filesystem.write(luagimp.variables.log_output_path, "")
-end
-
-function luagimp.create_function_helpstring(fun, helpstring)
-    setmetatable(fun, {
-        __tostring = function() return helpstring end
-    })
 end

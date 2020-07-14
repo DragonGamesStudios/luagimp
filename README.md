@@ -1,3 +1,6 @@
+# Suggestions
+Please post your suggestions about features and about what features you'd like to be available first in the issues site.
+
 # luaGIMP library
 luaGimp library is created to use gimp features in lua. It is divided into modules with names very similiar to gimp names. For example, to acces gimp filesystem module, let's say: creating new file, you need to call:
 ```

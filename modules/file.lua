@@ -432,6 +432,14 @@ luagimp.file = {
                 gamma = "sRGB",
                 fill_with = "background-color"
             }
+        },
+        available_gamma = {
+            "sRGB",
+            "linear-light"
+        },
+        available_color_space = {
+            "RGB-color",
+            "grayscale"
         }
     },
     helpstrings = {
@@ -491,22 +499,24 @@ function luagimp.file.new(model)
 
     -- Errors
 
-    if not (new_file.color_space == "RGB-color" or new_file.color_space == "grayscale") then
+    if not luagimp.is_valid(new_file.color_space, luagimp.file.variables.available_color_space) then
         error("luagimp-error: Incorrect value: \"" .. new_file.color_space .. "\" for advanced_options.color_space", 2)
     end
 
-    if not (new_file.gamma == "sRGB" or new_file.gamma == "linear-light") then
+    if not luagimp.is_valid(new_file.gamma, luagimp.file.variables.available_gamma) then
         error("luagimp-error: Incorrect value: \"" .. new_file.gamma .. "\" for advanced_options.gamma", 2)
     end
 
-    if not (new_file.fill_with == "background-color" or new_file.fill_with == "foreground-color" or new_file.fill_with == "white" or
-    new_file.fill_with == "transparency" or new_file.fill_with == "pattern") then
+    if not luagimp.is_valid(new_file.fill_with, luagimp.variables.available_fill_with) then
         error("luagimp-error: Incorrect value: \"" .. new_file.fill_with .. "\" for advanced_options.fill_with", 2)
     end
 
     -- Finalizing
+    new_file.layers = {}
     table.insert( luagimp.file.variables.files, new_file )
     luagimp.file.set_active_file(new_file)
+    luagimp.layer.new {name="background", fill_with=new_file.fill_with}
+    luagimp.layer.stack.select(1)
 
     -- Logging
     luagimp.log("luagimp project created. Dimensions: " .. new_file.width .. "x" .. new_file.height .. ". Template: " .. template .. ".")
