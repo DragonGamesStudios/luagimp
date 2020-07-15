@@ -14,9 +14,17 @@ function luagimp.layer.stack.select(layer)
             if not luagimp.variables.active_file.active_layer then
                 puterror = "luagimp error: no active layer. Cannot proceed."
             end
+            local ind = luagimp.index(luagimp.variables.active_file.layers, luagimp.variables.active_file.active_layer)
+            if ind ~= #luagimp.variables.active_file.layers then
+                luagimp.variables.active_file.active_layer = luagimp.variables.active_file.layers[ind+1]
+            end
         elseif layer == "above" then
             if not luagimp.variables.active_file.active_layer then
                 puterror = "luagimp error: no active layer. Cannot proceed."
+            end
+            local ind = luagimp.index(luagimp.variables.active_file.layers, luagimp.variables.active_file.active_layer)
+            if ind ~= 1 then
+                luagimp.variables.active_file.active_layer = luagimp.variables.active_file.layers[ind-1]
             end
         elseif layer == "top" then
             luagimp.variables.active_file.active_layer = luagimp.variables.active_file.layers[1]
