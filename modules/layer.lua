@@ -155,7 +155,9 @@ function luagimp.layer.new(model)
     end
 
     -- finalizing
-    table.insert(luagimp.variables.active_file.layers, new_layer)
+    local put_in = luagimp.index(luagimp.variables.active_file.layers, luagimp.variables.active_file.active_layer)
+    if not put_in then put_in = 1 end
+    table.insert(luagimp.variables.active_file.layers, put_in, new_layer)
 end
 
 function luagimp.layer.set_switch(layer, switch_id, value)

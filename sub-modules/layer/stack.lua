@@ -56,7 +56,7 @@ function luagimp.layer.stack.delete(layer)
         local ind = luagimp.index(luagimp.variables.active_file.layers, layer)
         if ind then
             table.remove( luagimp.variables.active_file.layers, ind )
-            luagimp.layer.stack.select(ind)
+            if #luagimp.variables.active_file.layers > 0 then luagimp.layer.stack.select(ind) else luagimp.variables.active_file.active_layer = nil end
         else
             puterror = "luagimp error: Layer does not exist."
         end
