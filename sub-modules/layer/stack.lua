@@ -55,16 +55,20 @@ function luagimp.layer.stack.delete(layer)
     local puterror
     if type(layer) == "number" then
         if luagimp.variables.active_file.layers[layer] then
+            local newactive = false
+            if luagimp.variables.active_file.layers[layer] == luagimp.variables.active_file.active_layer then newactive = true end
             table.remove( luagimp.variables.active_file.layers, layer )
-            luagimp.layer.stack.select(layer)
+            if newactive then luagimp.layer.stack.select(layer) end
         else
             puterror = "luagimp error: Attempt to delete not existing layer."
         end
     elseif type(layer) == "table" then
         local ind = luagimp.index(luagimp.variables.active_file.layers, layer)
         if ind then
+            local newactive = false
+            if layer == luagimp.variables.active_file.active_layer then newactive = true end
             table.remove( luagimp.variables.active_file.layers, ind )
-            if #luagimp.variables.active_file.layers > 0 then luagimp.layer.stack.select(ind) else luagimp.variables.active_file.active_layer = nil end
+            if newactive and #luagimp.variables.active_file.layers > 0 then luagimp.layer.stack.select(ind) else luagimp.variables.active_file.active_layer = nil end
         else
             puterror = "luagimp error: Layer does not exist."
         end
