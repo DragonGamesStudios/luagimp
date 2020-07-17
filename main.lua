@@ -23,7 +23,9 @@ luagimp = {
             "white",
             "transparency",
             "pattern"
-        }
+        },
+        background_color = {0, 0, 0},
+        foreground_color = {1, 1, 1}
     },
     _DEBUG = false
 }
@@ -86,12 +88,53 @@ function luagimp.switch(default, value)
 end
 
 function luagimp.index(tab, elem, key)
-    key = key or function(a) return a end
+    key = key or function(a)
+            return a
+        end
     for i, v in ipairs(tab) do
         if key(v) == elem then
             return i
         end
     end
+end
+
+function luagimp.get_color(format, r, g, b)
+    local color = {r, g, b}
+    if not g then
+        color = r
+    end
+    if type(format) == "string" then
+        if format == "RGB-255" then
+            color[1] = color[1] / 255
+            color[2] = color[2] / 255
+            color[3] = color[3] / 255
+        elseif format == "RGB-1" then
+        elseif format == "HEX" then
+            local hex = string.match(r, "[^#]......$")
+            if not hex then
+                error('luagimp error: Incorrect color value "' .. r .. '"', 2)
+            end
+            color = {
+                tonumber(string.sub(hex, 1, 2), 16) / 255,
+                tonumber(string.sub(hex, 3, 4), 16) / 255,
+                tonumber(string.sub(hex, 5, 6), 16) / 255
+            }
+        end
+    else
+        color = {format, r, g}
+        if not g then
+            color = format
+        end
+    end
+    return color
+end
+
+function luagimp.set_foreground_color(format, r, g, b)
+    luagimp.variables.foreground_color = luagimp.get_color(format, r, g, b)
+end
+
+function luagimp.set_background_color(format, r, g, b)
+    luagimp.variables.background_color = luagimp.get_color(format, r, g, b)
 end
 
 function luagimp.needs_active_file()
@@ -106,6 +149,13 @@ function luagimp.needs_active_layer()
     end
 end
 
+function luagimp.needs_view()
+    luagimp.needs_active_file()
+    if not luagimp.variables.active_file.view then
+        error("luagimp error: Needs view created.", 3)
+    end
+end
+
 function luagimp.init(path, pathtype)
     if pathtype == "require" then
         luagimp.variables.path.path = path
@@ -113,16 +163,18 @@ function luagimp.init(path, pathtype)
 
         -- import
 
-        require (path .. ".modules.file")
-        require (path .. ".modules.layer")
+        require(path .. ".modules.file")
+        require(path .. ".modules.layer")
+        require(path .. ".modules.view")
     elseif pathtype == "dofile" then
         luagimp.variables.path.path = path
         luagimp.variables.path.by = "dofile"
 
         -- import
 
-        dofile (path .. "/modules/file.lua")
-        dofile (path .. "/modules/layer.lua")
+        dofile(path .. "/modules/file.lua")
+        dofile(path .. "/modules/layer.lua")
+        dofile(path .. "/modules/view.lua")
     end
     love.filesystem.write(luagimp.variables.log_output_path, "")
 end
